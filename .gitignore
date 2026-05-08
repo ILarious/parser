@@ -49,6 +49,10 @@ gen
 !*.go
 !go.sum
 !go.mod
+!Dockerfile
+!docker-compose*.yml
+!.env.example
+!*.sql
 
 !README.md
 !LICENSE
@@ -57,4 +61,3 @@ gen
 
 # ...even if they are in subdirectories
 !*/
-
