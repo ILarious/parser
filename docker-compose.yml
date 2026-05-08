@@ -1,0 +1,49 @@
+services:
+  parser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parser
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: parser-postgres
+      POSTGRES_PORT: 5432
+      KAFKA_BROKER: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - parser-net
+      - back-for-order-net
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: parser-postgres
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - parser_postgres_data:/var/lib/postgresql/data
+    networks:
+      - parser-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  parser_postgres_data:
+
+networks:
+  parser-net:
+  back-for-order-net:
+    external: true
